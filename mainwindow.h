@@ -15,7 +15,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr)
     {
-        m_tabsheet = new TabPage(this);
+        m_tabsheet = new TabPage(this, "First page");
         QPalette pal(palette());
         pal.setColor(QPalette::Background, Qt::darkGray);
         m_tabsheet->setAutoFillBackground(true);
