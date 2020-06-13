@@ -109,8 +109,8 @@ protected:
     void resizeEvent(QResizeEvent *event) override
     {
         m_polygon.clear();
-        m_polygon << QPoint(125, 25) << QPoint(130, 1)<< QPoint(225, 1)<< QPoint(230, 25);
-        m_polygon << QPoint(width()-1, 25)<< QPoint(width()-1, height()-1)<< QPoint(1, height()-1)<< QPoint(1, 25);
+        m_polygon << QPoint(125, 25) << QPoint(130, 1)<< QPoint(225, 1)<< QPoint(230, 25)
+         << QPoint(width()-1, 25)<< QPoint(width()-1, height()-1)<< QPoint(1, height()-1)<< QPoint(1, 25);
 
         m_path = m_polygon.GetPath();
     }
@@ -120,8 +120,7 @@ protected:
         QPainter p(this);
         p.setRenderHint(QPainter::Antialiasing);
         p.fillPath(m_path,QBrush(Qt::blue));
-        p.strokePath(m_path, QPen(QBrush(Qt::white), 1));
-
+        p.strokePath(m_path, QPen(QBrush(Qt::white), 3));
     }
 
 private:
