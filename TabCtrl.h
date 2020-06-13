@@ -19,7 +19,7 @@ class AccessArray
 
     static const size_t SIZE = static_cast<size_t>(N);
     U m_array[SIZE];
-    bool m_mask[SIZE];
+    //bool m_mask[SIZE];
 
 public:
 
@@ -34,7 +34,7 @@ public:
         return m_array[n];
     }
 
-    ThisType& operator|(T v)
+/*    ThisType& operator|(T v)
     {
         (*this)[v] = true;
         return *this;
@@ -44,7 +44,7 @@ public:
     {
         (*this)[v] = false;
         return *this;
-    }
+    }*/
 
     U Sum()
     {
@@ -52,7 +52,7 @@ public:
 
         for(size_t i = 0; i < SIZE; i++)
         {
-            if(m_mask[i])
+            //if(m_mask[i])
                 sum += m_array[i];
         }
 
@@ -64,7 +64,7 @@ public:
         for(size_t i = 0; i < SIZE; i++)
         {
             m_array[i] = initvalue;
-            m_mask[i] = initflag;
+           // m_mask[i] = initflag;
         }
     }
 };
@@ -192,56 +192,60 @@ public:
         m_tabicon = style.standardIcon(QStyle::SP_MessageBoxQuestion);
         m_closeicon = style.standardIcon(QStyle::SP_TitleBarCloseButton);
         m_iconsize = QApplication::style()->pixelMetric(QStyle::PM_TabBarIconSize);
+        m_edge = 2;
+        m_position = 10;
+        m_border = 2;
+        m_offset = 5;
+        m_padding = 2;
 
-        m_hor[Hor::Position] = 10;
-        m_hor[Hor::HeadOffset] = 2;
-        m_hor[Hor::LeftBorder] = 2;
-        m_hor[Hor::IconLeftPadding] = 2;
-        m_hor[Hor::IconWidth] = 2;
-        m_hor[Hor::IconRightPadding] = 2;
-        m_hor[Hor::TextWidth] = 2;
-        m_hor[Hor::CloseLeftPadding] = 2;
-        m_hor[Hor::CloseWidth] = 2;
-        m_hor[Hor::CloseRightPadding] = 2;
-        m_hor[Hor::RightBorder] = 2;
-        m_hor[Hor::TailOffset] = 2;
+        m_hor[Hor::Position] = m_position;
+        m_hor[Hor::HeadOffset] = m_offset;
+        m_hor[Hor::LeftBorder] = m_border;
+        m_hor[Hor::IconLeftPadding] = m_padding;
+        m_hor[Hor::IconWidth] = m_iconsize;
+        m_hor[Hor::IconRightPadding] = m_padding;
+        m_hor[Hor::TextWidth] = 0;
+        m_hor[Hor::CloseLeftPadding] = m_padding;
+        m_hor[Hor::CloseWidth] = m_iconsize;
+        m_hor[Hor::CloseRightPadding] = m_padding;
+        m_hor[Hor::RightBorder] = m_border;
+        m_hor[Hor::TailOffset] = m_offset;
 
-        m_vert[Vert::CurrentEdge] = 2;
-        m_vert[Vert::TopBorder] = 2;
-        m_vert[Vert::TopPadding] = 2;
-        m_vert[Vert::MaxHeight] = 2;
-        m_vert[Vert::BottomPadding] = 2;
-        m_vert[Vert::BottomBorder] = 2;
+        m_vert[Vert::CurrentEdge] = m_edge;
+        m_vert[Vert::TopBorder] = m_border;
+        m_vert[Vert::TopPadding] = m_padding;
+        m_vert[Vert::MaxHeight] = m_iconsize;
+        m_vert[Vert::BottomPadding] = m_padding;
+        m_vert[Vert::BottomBorder] = m_border;
     }
 
 protected:
 
     void CalcTabSize()
     {
-        //Edge size
+        //Position may change
+        m_hor[Hor::Position] = m_position;
+
+        //Is active tab ?
         if(m_active) m_vert[Vert::CurrentEdge] = 0;
         else m_vert[Vert::CurrentEdge] = m_edge;
 
         //Text size
         QFontMetrics fm = this->fontMetrics();
         m_hor[Hor::TextWidth] = fm.horizontalAdvance(m_text);
-        m_textsize.setHeight(fm.height());
+        int textheight = fm.height();
+        if(m_iconsize > textheight)
+            m_vert[Vert::MaxHeight] = m_iconsize;
+        else
+            m_vert[Vert::MaxHeight] = textheight;
 
-        int leftpadding = m_cornerradius + m_headoffset + m_borderwidth;
-        int rightpadding = m_borderwidth + m_tailoffset + m_cornerradius;
+        int tabwidth = m_hor.Sum();
+        int tabhight = m_vert.Sum();
 
-        //Tab size
-        m_tabsize.setWidth(leftpadding + m_leftpadding
-                           + 2 * m_iconsize + m_textsize.width()
-                           + m_rightpadding + m_tailoffset);
-
-        int maxsize = m_iconsize;
-        if(m_textsize.height() > maxsize)
-            maxsize = m_textsize.height();
-
-        m_tabsize.setHeight(m_borderwidth + m_toppadding + maxsize + m_bottompadding);
-
-        //m_iconrect.setRect()
+        m_iconrect.setRect(0, 0, 0, 0);
+        m_textrect.setRect(0, 0, 0, 0);
+        m_closerect.setRect(0, 0, 0, 0);
+        m_tabrect.setRect(0, 0, 0, 0);
     }
 
     void DrawIcon()
@@ -318,8 +322,13 @@ private:
     RoundedPolygon m_polygon;
     QPainterPath m_path;
 
-    int m_edge = 2;
-    int m_iconsize = 0;
+    int m_edge;
+    int m_position;
+    int m_border;
+    int m_iconsize;
+    int m_offset;
+    int m_padding;
+
     QIcon m_tabicon;
     QString m_text;
     QIcon m_closeicon;
