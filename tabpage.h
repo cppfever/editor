@@ -8,7 +8,7 @@
 #include <QCommonStyle>
 #include <QApplication>
 
-#include "accessarray.h"
+//#include "accessarray.h"
 #include "roundedpolygon.h".h"
 
 namespace Editor
@@ -21,46 +21,13 @@ public:
     TabPage(QWidget* parent, const QString text) : QWidget(parent)
     {
         m_text = text;
-        LoadDefaults();
-    }
 
-    void LoadDefaults()
-    {
         QCommonStyle style;
-        m_tabicon = style.standardIcon(QStyle::SP_MessageBoxQuestion);
+        m_icon = style.standardIcon(QStyle::SP_MessageBoxQuestion);
         m_closeicon = style.standardIcon(QStyle::SP_TitleBarCloseButton);
         m_iconsize = QApplication::style()->pixelMetric(QStyle::PM_TabBarIconSize);
-        m_radius = 5;
-        m_edge = 2;
-        m_position = 10;
-        m_border = 2;
-        m_offset = 5;
-        m_padding = 2;
-        m_tabwidth = 0;
-        m_tabhight = 0;
-
-        m_hor[Hor::Position] = m_position;
-        m_hor[Hor::LeftCornerRadius] = m_radius;
-        m_hor[Hor::HeadOffset] = m_offset;
-        m_hor[Hor::LeftBorder] = m_border;
-        m_hor[Hor::IconLeftPadding] = m_padding;
-        m_hor[Hor::IconWidth] = m_iconsize;
-        m_hor[Hor::IconRightPadding] = m_padding;
-        m_hor[Hor::TextWidth] = 0;
-        m_hor[Hor::CloseLeftPadding] = m_padding;
-        m_hor[Hor::CloseWidth] = m_iconsize;
-        m_hor[Hor::CloseRightPadding] = m_padding;
-        m_hor[Hor::RightBorder] = m_border;
-        m_hor[Hor::TailOffset] = m_offset;
-        m_hor[Hor::RightCornerRadius] = m_radius;
-
-        m_vert[Vert::CurrentEdge] = m_edge;
-        m_vert[Vert::TopBorder] = m_border;
-        m_vert[Vert::TopPadding] = m_padding;
-        m_vert[Vert::MaxHeight] = m_iconsize;
-        m_vert[Vert::BottomPadding] = m_padding;
-        m_vert[Vert::BottomBorder] = m_border;
     }
+
 
 protected:
 
@@ -68,7 +35,7 @@ protected:
     {
         MakeTabPage();
 
-        if(!m_active)
+        if(m_active)
             m_path = m_polygon.GetPath(m_radius);
         else
             m_path = m_polygon.GetTabPath(m_radius);
@@ -80,103 +47,63 @@ protected:
         QPainter p(this);
         p.setRenderHint(QPainter::Antialiasing);
         p.fillPath(m_path,QBrush(Qt::blue));
-        //p.strokePath(m_path, QPen(QBrush(Qt::white), m_border));
+        p.strokePath(m_path, QPen(QBrush(Qt::white), m_border));
     }
 
 private:
 
-    //Access array for horizontal value indexes
-    enum class Hor
-    {
-        Position,
-        LeftCornerRadius,
-        HeadOffset,
-        LeftBorder,
-        IconLeftPadding,
-        IconWidth,
-        IconRightPadding,
-        TextWidth,
-        CloseLeftPadding,
-        CloseWidth,
-        CloseRightPadding,
-        RightBorder,
-        TailOffset,
-        RightCornerRadius,
-        Count
-    };
-
-    //Access array for vertical value indexes
-    enum class Vert
-    {
-        CurrentEdge,
-        TopBorder,
-        TopPadding,
-        MaxHeight,
-        BottomPadding,
-        BottomBorder,
-        Count
-    };
-
-    AccessArray<int, Hor, Hor::Count> m_hor;
-    AccessArray<int, Vert, Vert::Count> m_vert;
-
     RoundedPolygon m_polygon;
     QPainterPath m_path;
 
-    int m_radius;
-    int m_edge;
-    int m_position;
-    int m_border;
-    int m_iconsize;
-    int m_offset;
-    int m_padding;
-    int m_tabwidth;
-    int m_tabhight;
+    int m_position = 5;
+    int m_radius = 10;
+    int m_border = 2;
+    int m_currentborder = 0;
+    int m_offset = 5;
+    int m_padding = 2;
+    int m_iconsize = 0;
+    int m_textwidth = 0;
+    int m_textheight = 0;
+    int m_vertheight = 0;
 
-    QIcon m_tabicon;
+    int m_edge = 2;
+    int m_currentedge = 0;
+
+    int m_tabwidth = 0;
+    int m_tabhight = 0;
+
+    QIcon m_icon;
     QString m_text;
     QIcon m_closeicon;
     bool m_active = true;
+    bool m_drawborder = true;
 
     QRect m_iconrect = QRect(0, 0, 0, 0);
     QRect m_textrect = QRect(0, 0, 0, 0);
     QRect m_closerect = QRect(0, 0, 0, 0);
 
-
-    void CalcTabSize()
-    {
-        //Position may change
-        m_hor[Hor::Position] = m_position;
-
-        //Is active tab ?
-        if(m_active) m_vert[Vert::CurrentEdge] = 0;
-        else m_vert[Vert::CurrentEdge] = m_edge;
-
-        //Text size
-        QFontMetrics fm = this->fontMetrics();
-        m_hor[Hor::TextWidth] = fm.horizontalAdvance(m_text);
-        int textheight = fm.height();
-        if(m_iconsize > textheight)
-            m_vert[Vert::MaxHeight] = m_iconsize;
-        else
-            m_vert[Vert::MaxHeight] = textheight;
-
-        m_tabwidth = m_hor.Sum();
-        m_tabhight = m_vert.Sum();
-    }
-
     void MakeTabPage()
     {
-        CalcTabSize();
+        //Text size
+        QFontMetrics fm = this->fontMetrics();
+        m_textwidth = fm.horizontalAdvance(m_text);
+        m_textheight = fm.height();
+        m_vertheight = (m_iconsize > m_textheight) ? m_iconsize : m_textheight;
+        m_currentedge = m_active ? 0 : m_edge;
+        m_currentborder = m_drawborder ? m_border : 0;
+
+        m_tabwidth = m_radius + m_currentborder + m_offset + m_iconsize + m_padding + m_textwidth + m_padding + m_iconsize + m_offset + m_currentborder + m_radius;
+        m_tabhight = m_currentedge + m_currentborder + m_padding + m_vertheight + m_padding + m_currentborder;
+
 
         //Tab
-        int leftbottomx = m_hor[Hor::Position] + m_hor[Hor::LeftCornerRadius];
-        int leftbottomy = m_vert[Vert::CurrentEdge] + m_tabhight;
-        int lefttopx = leftbottomx + m_hor[Hor::HeadOffset];
-        int lefttopy = m_vert[Vert::CurrentEdge];
+        int leftbottomx = m_position + m_radius;
+        int leftbottomy = m_currentedge + m_tabhight;
+        int lefttopx = leftbottomx + m_offset;
+        int lefttopy = m_currentedge;
         int rightbottomx = leftbottomx + m_tabwidth;
         int rightbottomy = leftbottomy;
-        int righttopx = rightbottomx - m_hor[Hor::TailOffset];
+        int righttopx = rightbottomx - m_offset;
         int righttopy = lefttopy;
 
         m_polygon.clear();
@@ -185,20 +112,20 @@ private:
                   << QPoint(righttopx, righttopy)
                   << QPoint(rightbottomx, rightbottomy);
 
-        m_iconrect.setRect(lefttopx + m_border, m_edge + m_border, m_iconsize, m_iconsize);
-        m_textrect.setRect(m_iconrect.right() + 1, m_iconrect.top(), m_hor[Hor::TextWidth], m_vert[Vert::MaxHeight]);
-        m_closerect.setRect(0, 0, 0, 0);
+        m_iconrect.setRect(lefttopx + m_currentborder, m_currentedge + m_currentborder, m_iconsize, m_iconsize);
+        m_textrect.setRect(m_iconrect.right() + 1, m_iconrect.top(), m_textwidth, m_textheight);
+        m_closerect.setRect(m_textrect.right() + 1, m_textrect.top(), m_iconsize, m_iconsize);
 
         //Page
         if(m_active)
         {
-            righttopx = width()-1;
-            righttopy = m_vert[Vert::CurrentEdge] + m_tabhight;
-            rightbottomx = width()-1;
-            rightbottomy = height()-1;
-            leftbottomx = 1;
-            leftbottomy = height()-1;
-            lefttopx = 1;
+            righttopx = width();
+            righttopy = m_currentedge + m_tabhight;
+            rightbottomx = righttopx;
+            rightbottomy = height();
+            leftbottomx = 0;
+            leftbottomy = rightbottomy;
+            lefttopx = 0;
             lefttopy = righttopy;
 
             m_polygon << QPoint(righttopx, righttopy)
