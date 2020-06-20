@@ -17,7 +17,10 @@ add_executable(editor
     main.cpp
     mainwindow.cpp
     mainwindow.h
-    TabCtrl.h
+    accessarray.h
+    roundedpolygon.h
+    tabpage.h
+    tabctrl.h
   )
 
 target_link_libraries(editor PRIVATE Qt5::Widgets)
